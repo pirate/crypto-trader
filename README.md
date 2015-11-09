@@ -35,4 +35,4 @@ def analyze(self):
 The trading algorithm is nowhere near complete, it runs and works though, and will trade REAL MONEY, so beware if you run it.  
 
 ======
-I'm not responsible for any money you lose due to bugs in the code.
+I'm not responsible for any money you lose due to my bad algorithm, bugs in the implementation of it, or fluctuations in the market.
