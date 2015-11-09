@@ -11,7 +11,7 @@ If the price drops below the purchase price, it'll sell immediately to avoid any
 If the price rises back above the purchase price, it'll rebuy the same amount, and sell once it goes above the min profit margin amount + transaction fees.  This type of tight, risk-averse bot will only make small profits because it'll never wait for big upward trends to max out, it'll sell as soon as it goes in the green.
 
 ```python
-def analyze(self):
+while keep_trading:
     for idx, buy in enumerate(self.buys):
         if self.get_price() > buy['price'] + market_fees + min_profit_margin:
             self.buys.pop(idx)
