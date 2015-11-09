@@ -33,6 +33,16 @@ def analyze(self):
 
 
 The trading algorithm is nowhere near complete, it runs and works though, and will trade REAL MONEY, so beware if you run it.  
+   
+======
+
+TODOS:
+
+* Implement better ties between buys and sells (instead of just `buys.pop(idx)`)
+* Write the initial buy code that kicks off trading each day
+* Implement a bankroll system so the bot is only ever trading with profits
+* Write a meta-trader that spawns multiple traders with tweaked parameters to see which ones make the most money
+* Switch to the Coinbase Exchange API instead of the general trading API
 
 ======
 I'm not responsible for any money you lose due to my bad algorithm, bugs in the implementation of it, or fluctuations in the market.
