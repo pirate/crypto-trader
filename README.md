@@ -33,7 +33,7 @@ while bankroll > 0:
 
 
 The trading algorithm is nowhere near complete, it will trade REAL MONEY though, so beware if you run it.  
-The `trader.py file is intentionally broken, to run it you much read `analyze()` and adapt it to your own needs.
+The `trader.py` file is intentionally broken, to run it you much read `analyze()` and adapt it to your own needs.
    
 ======
 
