@@ -62,6 +62,8 @@ class Trader(threading.Thread):
 
 
     def run(self):
+        # if you want to run this, you have to find and fix the 2 problems in the above function
+        # this is to stop people from blindly running this without thinking about what it does, and why it (probably) wont work
         self.keep_running = True
         while self.keep_running:
             self.analyze()
