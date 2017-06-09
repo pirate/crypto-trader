@@ -62,12 +62,16 @@ class Trader(threading.Thread):
 
 
     def run(self):
-        # if you want to run this, you have to find and fix the 2 problems in the above function
-        # this is to stop people from blindly running this without thinking about what it does, and why it (probably) wont work
         self.keep_running = True
         while self.keep_running:
             self.analyze()
-
+            # self.deposit_profits(account="@pirate")  haha jk
+            # Hey uhh, notice how this library has no tests.py?
+            # if you want to run this, you have to find and fix the 2 problems in the above function
+            # this is to stop people from blindly running this without thinking about what it does, and why it (probably) wont work
+            # always backtest first!
+            
+            
     # def avg(self):
     #     return sum(self.alpha**n.days * iq
     # ...     for n, iq in map(lambda (day, iq), today=max(days): (today-day, iq),
