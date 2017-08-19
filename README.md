@@ -1,5 +1,5 @@
 # Python Coinbase trading bot (BTC<>USD)
-:moneybag: Bitcoin trading bot based on a simple exponential moving average (trading via Coinbase).
+:moneybag: Bitcoin trading bot based on a simple exponential moving average (trading via [Coinbase](https://www.coinbase.com/)).
 
 I'm trying to write a simple bot that sells bitcoin the moment it makes enough profit to pay for transaction fees, plus a small margin.
 It will do this thousands of times per day, and hopefully profit in the long run as long as the market is volatile and trending upwards (i.e. as long as not too many people are running bots exactly like this one).
