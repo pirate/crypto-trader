@@ -33,7 +33,7 @@ while bankroll > 0:
 
 
 The trading algorithm is nowhere near complete, it will trade REAL MONEY though, so beware if you run it.  
-The `trader.py` file is intentionally broken, to run it you much read `analyze()` and adapt it to your own needs.
+The `trader.py` file is intentionally broken to stop people from emailing me with "I ran your bot and lost all my money", to run it you need to read `analyze()` and adapt it to your own needs.  In an upwards-trending market the algorithm detailed above is unlikely to make any more than you would by holding the money and not trading at all (due to parasitic losses from fees).  It's on github to serve as a template for people who want to write their own bots that trade on coinbase.
    
 ======
 
