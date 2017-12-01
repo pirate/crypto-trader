@@ -8,7 +8,7 @@ If everyone ran bots like this the market would be flat, and no one would profit
 
 The algorithm works by making a set of small initial buys (~$10), then tracking the market price in relation to the purchased price.
 If the price drops below the purchase price, it'll sell immediately to avoid any losses.
-If the price rises back above the purchase price, it'll rebuy the same amount, and sell once it goes above the min profit margin amount + transaction fees.  This type of tight, risk-averse bot will only make small profits because it'll never wait for big upward trends to max out, it'll sell as soon as it goes in the green.
+If the price rises back above the purchase price, it'll rebuy the same amount, and sell once it goes above the min profit margin amount + transaction fees.  This type of tight, risk-averse bot will only make small profits because it'll never wait for big upward trends to max out, it'll sell as soon as it goes in the green.  This strategy is famous as the "quit while you're ahead" strategy,  and it simply [doesn't work](https://gist.github.com/pirate/eac582480aa34b5adda9e6adc1878190) in the long run.
 
 ```python
 while bankroll > 0:
