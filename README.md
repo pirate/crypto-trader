@@ -32,17 +32,15 @@ while bankroll > 0:
 ```
 
   
-The `trader.py` file is intentionally broken to stop people from emailing me with "I ran your bot and lost all my money", to run it you need to read `analyze()` and adapt it to your own needs.  In an upwards-trending market the algorithm detailed above is unlikely to make any more than you would by holding the money and not trading at all (due to parasitic losses from fees).  It's on github to serve as a template for people who want to write their own bots that trade on coinbase.
+The `trader.py` file is intentionally broken to stop people from emailing me with "I ran your bot and lost all my money", to run it you need to read `analyze()` and adapt it to your own needs.  Even in an upwards-trending market, the algorithm detailed above is unlikely to make any more than you would by holding the money and not trading at all (due to parasitic losses from fees).  It's on github to serve as a template for people who want to write their own bots that trade on coinbase.
    
 ======
 
-TODOS:
+Possible TODOS:
 
-* Implement better ties between buys and sells (instead of just `buys.pop(idx)`)
-* Write the initial buy code that kicks off trading each day
 * Implement a bankroll system so the bot is only ever trading with profits
 * Write a meta-trader that spawns multiple traders with tweaked parameters to see which ones make the most money
 * Switch to the Coinbase Exchange API instead of the general trading API
 
 ======
-I'm not responsible for any money you lose due to my bad algorithm, bugs in the implementation of it, or fluctuations in the market.
+I'm not responsible for any money you lose from running the "quit while you're ahead" strategy, bugs in the implementation of it, or fluctuations in the market.
