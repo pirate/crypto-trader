@@ -9,14 +9,12 @@ Example Usage:
 from symbols import Order, ETH, USD
 from gemini_api import ticker order_status, new_order
 
-# REST API Functions
-# https://docs.gemini.com/rest-api/#requests
-price_info = ticker('ethusd')
-result = Order(order_status('2341241241'))
-result = Order(new_order('buy', 'ethusd', ETH(0.001), USD(760)))
+# REST API Functions https://docs.gemini.com/rest-api/#requests
+last_price_info = ticker('ethusd')
+order = Order(new_order('buy', 'ethusd', ETH(0.001), USD(760)))
+updated_order = Order(order_status(order.id))
 
-# Realtime WebSocket Events
-# https://docs.gemini.com/websocket-api/#websocket-request
+# Realtime WebSocket Events  https://docs.gemini.com/websocket-api/#websocket-request
 for event in order_events('2341241241'):
     print(event)
 ```
