@@ -1,5 +1,4 @@
-secrets.py
-.last_nonce.txt
 .mypy_cache/
+secrets.py
+data/
 misc/
-*.csv

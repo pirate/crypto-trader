@@ -1,4 +1,5 @@
 class Currency:
+    """Base class for currencies that have a decimal place limit"""
     icon: str
     symbol: str
     decimal_places: int
@@ -35,8 +36,14 @@ currency_by_symbol = {
     'eth': ETH,
 }
 
+currency_pair_by_symbol = {
+    'ethusd': (ETH, USD),
+    'btcusd': (BTC, USD),
+}
+
 
 class Order:
+    """Object representing a Gemini order"""
     # Spec: https://docs.gemini.com/rest-api/#order-status
     # {
     #   "order_id" : "44375901",
@@ -87,3 +94,7 @@ class Order:
     @property
     def price_amt(self) -> Currency:
         return currency_by_symbol[self.symbol[3:]](float(self.price))
+
+    @property
+    def usd_amt(self) -> float:
+        return float(self.price) * float(self.original_amount)
