@@ -2,6 +2,7 @@
 :moneybag: Python bindings for trading Bitcoin, Ethereum, & USD on the Gemini.com Exchange API.
 
 ---
+<img src="https://nicksweeting.com/crypto-trader.png" width="600px"/>
 
 Example Usage:
 ```python
