@@ -1,2 +1,2 @@
-api_key = 'coinbase_API_KEY_here'
-api_secret = 'coinbase_API_SECRET_here'
+API_KEY = 'gemini_API_KEY_here'
+API_SECRET = 'gemini_API_SECRET_here'

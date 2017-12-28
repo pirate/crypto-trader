@@ -1,82 +1,101 @@
-import threading
-from coinbase.wallet.client import Client
-from money import Money
+#!/usr/bin/env python3
+from datetime import datetime
+from time import sleep
 
-from secrets import api_key, api_secret
+from symbols import Order, ETH, USD
+from api import ticker, new_order, order_status
+from settings import (
+    USD_ORDER_AMT,
+    MAX_LOSS_RATIO,
+    MAX_GAIN_RATIO,
+    MAX_ACTIVE_ORDERS,
+    OVERPAY_RATIO,
+)
 
-market_fees = 0.15          # coinbase per-transaction fee in dollars
-min_profit_margin = 2.0     # minimum price increase before we sell out
-
-class Trader(threading.Thread):
-    def __init__(self, api_key, api_secret, alpha=0.5):
-        assert 0 < alpha <= 1.0  # smoothing factor for the exponential moving avg function
-        super(threading.Thread, self).__init__()
-        self.alpha = alpha
-        self.client = Client(api_key, api_secret)
-        self.user = self.client.get_current_user()
-        self.buys = []
-        self.sells = []
-        print 'Trading As:         %s (%s)' % (self.user['name'], self.user['email'])
-        print 'Starting Balance:   $%s (%s BTC @ $%s/BTC)' % (self.balance['USD'], self.balance['BTC'], self.get_price())
-
-    @property
-    def account(self):
-        return [acct for acct in self.client.get_accounts()['data'] if acct['balance']['currency'] == 'BTC'][0]
-
-    @property
-    def balance(self):
-        return {
-            self.account['balance']['currency']:        float(self.account['balance']['amount']),
-            self.account['native_balance']['currency']: float(self.account['native_balance']['amount']),
-        }
-
-    def get_price(self):
-        return float(self.client.get_spot_price()['amount'])
-
-    def buy(self, amount):
-        buy_obj = self.account.buy(amount, 'USD')
-        self.buys.append(buy_obj)
-
-    def sell(self, amount):
-        sell_obj = self.account.sell(amount, 'USD')
-        self.sells.append(sell_obj)
-
-    def analyze(self):
-        for idx, buy in enumerate(self.buys):
-            if self.get_price() > buy['price'] + market_fees + min_profit_margin:
-                self.buys.pop(idx)
-                self.sell(buy['amount'])    # if price rises above buy price + market fees by a certain amount, sell early and reap the tiny profits
-            elif self.get_price() < buy['price']:
-                self.buys.pop(idx)
-                self.sell(buy['amount'])    # if price drops below the price it was bought at, sell immediately to minimize losses
-            else:
-                pass                        # do nothing until the price fluctuates enough to make more of a difference
-
-        for idx, sell in enumerate(self.sells):
-            if self.get_price() > sell['price']:
-                self.sells.pop(idx)
-                self.buy(sell['amount'])    # if price starts to rise above the amount we sold it for, rebuy the same amount
-            else:
-                # if market trends downwards we'll lose (number of transactions * (market fee per transaction + min profit margin))
-                pass                        # price is below the amount we sold for, don't do anything until it's passing break-even again
+adjust = lambda price, ratio: price + (price * ratio)
 
 
-    def run(self):
-        self.keep_running = True
-        while self.keep_running:
-            self.analyze()
-            # self.deposit_profits(account="@pirate")  haha jk
-            # Hey uhh, notice how this library has no tests.py?
-            # if you want to run this, you have to find and fix the 2 problems in the above function
-            # this is to stop people from blindly running this without thinking about what it does, and why it (probably) wont work
-            # always backtest first!
-            
-            
-    # def avg(self):
-    #     return sum(self.alpha**n.days * iq
-    # ...     for n, iq in map(lambda (day, iq), today=max(days): (today-day, iq),
-    # ...         sorted(zip(days, IQ), key=lambda p: p[0], reverse=True))
+def save_price(price) -> None:
+    ts = datetime.now().timestamp()
+    symbol = 'ethusd'
 
-#if __name__ == '__main__':
+    with open(f'{symbol}.prices.csv', 'a+', encoding='utf-8') as f:
+        f.write(f'{symbol},{ts},{price}\n')
 
-t = Trader(api_key, api_secret)
+def save_order(order: Order) -> None:
+    symbol = order.symbol
+    ts = order.timestamp
+    side = order.side
+    amt = order.original_amount
+    price = order.price
+    
+    with open(f'{symbol}.orders.csv', 'a+', encoding='utf-8') as f:
+        f.write(f'{symbol},{ts},{side},{amt},{price}\n')
+
+
+def price_stream(symbol: str):
+    while True:
+        price = ticker(symbol)
+        yield float(price['last'])
+
+
+
+def runloop():
+    last_id = 0
+
+    print(
+        f'Creating {MAX_ACTIVE_ORDERS} orders of ${USD_ORDER_AMT} each, selling'
+        f' if price rises by {MAX_GAIN_RATIO * 100}% or lowers by '
+        f'{MAX_LOSS_RATIO * 100}%.'
+    )
+
+    active_orders = {}
+    closed_orders = {}
+
+    for price in price_stream('ethusd'):
+        save_price(price)
+        print('=============================================')
+        print(f'Current Price: ${price}')
+
+        for id, order in active_orders.items():
+            active_orders[id] = Order(order_status(order.id))
+
+        while len(active_orders) < max_active_orders:
+            last_id += 1
+            buy_order = Order(new_order('buy', 'ethusd', ETH(usd_amt / price), USD(adjust(price, overpay_ratio))))
+            save_order(buy_order)
+            active_orders[last_id] = buy_order
+
+        for id, order in active_orders.items():
+            price = float(order.price)
+            if (price > adjust(price, max_gain_ratio) or
+                  price < adjust(price, max_loss_ratio)):
+                
+                buy_order = active_orders.pop(id)
+                sell_order = Order(new_order('sell', 'ethusd', buy_order.amt, USD(adjust(price, -overpay_ratio))))
+                save_order(buy_order)
+
+                closed_orders[id] = {
+                    'buy': buy_order,
+                    'sell': sell_order,
+                    'net': ((float(sell_order.price) * float(sell_order.original_amount))
+                            - (float(buy_order.price) * float(buy_order.original_amount))),
+                }
+
+        net_gains = sum(order['net'] for order in closed_orders.values())
+
+        print(f'Active Orders:')
+        print('\n'.join(f'{id}: {order}' for id, order in active_orders.items()))
+        print(f'Closed Orders:')
+        print('\n'.join(f'{id}: {order}' for id, order in closed_orders.items()))
+        print(f'Net Gains: ${net_gains}')
+        sleep(30)
+
+
+
+
+if __name__ == '__main__':
+    try:
+        runloop()
+    except (EOFError, KeyboardInterrupt):
+        print('Stopped!')
