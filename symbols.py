@@ -1,16 +1,17 @@
+from decimal import Decimal
+
 class Currency:
     """Base class for currencies that have a decimal place limit"""
     icon: str
     symbol: str
     decimal_places: int
 
-    def __init__(self, amt: float) -> None:
-        amt = round(amt, self.decimal_places)
+    def __init__(self, amt: Decimal) -> None:
         assert amt > 0
-        self.amt = amt
+        self.amt = round(Decimal(amt), self.decimal_places)
 
     def __str__(self) -> str:
-        return str(round(self.amt, self.decimal_places))
+        return str(self.amt)
 
     def __repr__(self) -> str:
         return f'{self.icon}{self.amt}'
@@ -77,24 +78,25 @@ class Order:
         return self.data[attr]
 
     def __repr__(self):
-        finished = round((float(self.executed_amount) / float(self.original_amount)) * 100, 0)
+        finished = round((Decimal(self.executed_amount) / Decimal(self.original_amount)) * 100, 0)
         return (
-            f'#{self.id} {self.side.upper()} {repr(self.buy_amt)} @ '
-            f'{repr(self.price_amt)} {self.symbol.upper()} ({finished}% filled)'
+            f'{self.side.upper()} {self.symbol.upper()} '
+            f'{repr(self.buy_amt)} @ {repr(self.price_amt)} ({finished}% filled '
+            f'for ${round(self.filled_amt, 2)})'
         )
 
     @property
-    def is_finished(self):
+    def is_filled(self):
         return self.remaining_amount == "0"
 
     @property
     def buy_amt(self) -> Currency:
-        return currency_by_symbol[self.symbol[:3]](float(self.original_amount))
+        return currency_by_symbol[self.symbol[:3]](Decimal(self.original_amount))
 
     @property
     def price_amt(self) -> Currency:
-        return currency_by_symbol[self.symbol[3:]](float(self.price))
+        return currency_by_symbol[self.symbol[3:]](Decimal(self.price))
 
     @property
-    def usd_amt(self) -> float:
-        return float(self.price) * float(self.original_amount)
+    def filled_amt(self) -> Decimal:
+        return Decimal(self.price) * Decimal(self.executed_amount)

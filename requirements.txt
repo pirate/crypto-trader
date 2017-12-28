@@ -1,2 +1,3 @@
-money
-coinbase
+mypy
+requests
+websocket-client
