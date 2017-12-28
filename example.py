@@ -2,7 +2,7 @@
 """
 Usage:
     pip install -r requirements.txt
-    ./trader.py
+    ./example.py
 
 Config:
     cp secrets_default.py secrets.py
@@ -10,7 +10,7 @@ Config:
     nano settings.py  # tweak bot parameters
 
 MyPy Type-Checing:
-    env MYPYPATH=./stubs mypy trader.py
+    env MYPYPATH=./stubs mypy example.py
 """
 
 import os

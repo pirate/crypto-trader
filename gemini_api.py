@@ -1,3 +1,19 @@
+"""
+Gemini API Bindings
+
+    REST API: https://docs.gemini.com/rest-api/#requests
+        public:
+            /ticker
+        private:
+            /heartbeat
+            /order/new
+            /order/status
+
+    WebSocket API: https://docs.gemini.com/websocket-api/#websocket-request
+        private:
+            /order/events
+"""
+
 import os
 import base64
 import hmac
@@ -38,6 +54,7 @@ def retry_if_exception(func):
     return wrapped
 
 def get_nonce(min_nonce: int=STARTING_NONCE) -> int:
+    """nonce must always monotonically increase, so we track it in a file"""
     last = min_nonce
     try:
         with open(os.path.join(DATA_DIR, '.last_nonce.txt'), 'r') as f:
