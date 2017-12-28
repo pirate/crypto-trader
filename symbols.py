@@ -1,3 +1,11 @@
+"""
+Currency types as defined here:
+    https://docs.gemini.com/rest-api/#symbols-and-minimums
+
+Order object representing a Gemini order:
+    https://docs.gemini.com/rest-api/#order-status
+"""
+
 from decimal import Decimal
 
 class Currency:
@@ -40,6 +48,7 @@ currency_by_symbol = {
 currency_pair_by_symbol = {
     'ethusd': (ETH, USD),
     'btcusd': (BTC, USD),
+    'ethbtc': (ETH, BTC),
 }
 
 
@@ -71,17 +80,17 @@ class Order:
             print(json.get('message'))
             raise Exception(json.get('reason'))
 
-        assert 'id' in json
+        assert 'id' in json, 'Order json must have an id field.'
         self.data = json
 
     def __getattr__(self, attr):
         return self.data[attr]
 
     def __repr__(self):
-        finished = round((Decimal(self.executed_amount) / Decimal(self.original_amount)) * 100, 0)
+        pct = round((Decimal(self.executed_amount) / Decimal(self.original_amount)) * 100)
         return (
             f'{self.side.upper()} {self.symbol.upper()} '
-            f'{repr(self.buy_amt)} @ {repr(self.price_amt)} ({finished}% filled '
+            f'{repr(self.buy_amt)} @ {repr(self.price_amt)} ({pct}% filled '
             f'for ${round(self.filled_amt, 2)})'
         )
 

@@ -1,11 +1,25 @@
 #!/usr/bin/env python3
+"""
+Usage:
+    pip install -r requirements.txt
+    ./trader.py
+
+Config:
+    cp secrets_default.py secrets.py
+    nano secrets.py   # edit API key
+    nano settings.py  # tweak bot parameters
+
+MyPy Type-Checing:
+    env MYPYPATH=./stubs mypy trader.py
+"""
+
 import os
 from random import randint
 from datetime import datetime
 from time import sleep
 from decimal import Decimal
 
-from api import ticker, new_order, order_status, heartbeat
+from gemini_api import ticker, new_order, order_status, heartbeat
 from symbols import Order, currency_pair_by_symbol
 from settings import (
     POLL_DELAY,
