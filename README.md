@@ -1,4 +1,4 @@
-# Python Gemini Bindings & Example Bot (BTCUSD, ETHUSD, ETHBTC)
+# Cryptocurrency Exchange API Bindings & Example Bots (BTCUSD, ETHUSD, ETHBTC)
 :moneybag: Python bindings for trading Bitcoin & Ethereum on the Gemini.com Exchange API.
 
 Comes with a starter bot that makes some random initial buys and triggers sells once a certain threshold amount of money is made or lost.
