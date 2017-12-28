@@ -1,7 +1,26 @@
-# Cryptocurrency Exchange API Bindings & Example Bots (BTCUSD, ETHUSD, ETHBTC)
-:moneybag: Python bindings for trading Bitcoin & Ethereum on the Gemini.com Exchange API.
+# Crypto Trading Bot Framework using the Gemini Exchange
+:moneybag: Python bindings for trading Bitcoin, Ethereum, & USD on the Gemini.com Exchange API.
 
-Comes with a starter bot that makes some random initial buys and triggers sells once a certain threshold amount of money is made or lost.
+---
+
+Example Usage:
+```python
+from symbols import Order, ETH, USD
+from gemini_api import ticker order_status, new_order
+
+# REST API Functions
+# https://docs.gemini.com/rest-api/#requests
+price_info = ticker('ethusd')
+result = Order(order_status('2341241241'))
+result = Order(new_order('buy', 'ethusd', ETH(0.001), USD(760)))
+
+# Realtime WebSocket Events
+# https://docs.gemini.com/websocket-api/#websocket-request
+for event in order_events('2341241241'):
+    print(event)
+```
+
+It also comes with an example bot strategy that makes some random initial buys and triggers sells once a certain threshold amount of money is made or lost.
 
 **Usage:**
 ```bash
@@ -40,4 +59,4 @@ This type of tight, risk-averse bot will only make small profits because it neve
 
 ## Disclaimer:
 
-I'm not responsible for any money you lose from this code.
+I'm not responsible for any money you lose from this code.  The code is MIT Licensed.
