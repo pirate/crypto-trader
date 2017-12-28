@@ -2,7 +2,7 @@
 """
 Usage:
     pip install -r requirements.txt
-    ./example.py
+    ./example.py ethusd
 
 Config:
     cp secrets_default.py secrets.py
@@ -14,13 +14,23 @@ MyPy Type-Checing:
 """
 
 import os
+import sys
+
 from random import randint
 from datetime import datetime
 from time import sleep
 from decimal import Decimal
 
 from gemini_api import ticker, new_order, order_status, heartbeat
-from symbols import Order, currency_pair_by_symbol
+from symbols import Order, currency_pair_by_symbol, currency_art
+from data import (
+    save_price,
+    save_order,
+    load_active_orders,
+    load_closed_orders,
+    save_active_orders,
+    save_closed_orders,
+)
 from settings import (
     POLL_DELAY,
     SYMBOL,
@@ -35,75 +45,19 @@ from settings import (
     DATA_DIR,
 )
 
-ascii_art = """
- _______  _______           _______ _________ _______ 
-(  ____ \(  ____ )|\     /|(  ____ )\__   __/(  ___  )
-| (    \/| (    )|( \   / )| (    )|   ) (   | (   ) |
-| |      | (____)| \ (_) / | (____)|   | |   | |   | |
-| |      |     __)  \   /  |  _____)   | |   | |   | |
-| |      | (\ (      ) (   | (         | |   | |   | |
-| (____/\| ) \ \__   | |   | )         | |   | (___) |
-(_______/|/   \__/   \_/   |/          )_(   (_______)
-"""
-
-### Logging & Persistence
-
-def save_price(price) -> None:
-    ts = datetime.now().timestamp()
-
-    with open(os.path.join(DATA_DIR, 'price-history.csv'), 'a+', encoding='utf-8') as f:
-        f.write(f'{ts},{SYMBOL},{price}\n')
-
-def save_order(order: Order) -> None:
-    with open(os.path.join(DATA_DIR, 'order-history.csv'), 'a+', encoding='utf-8') as f:
-        f.write(f'{order.timestamp},{order.id},{order.side},{order.symbol},{order.original_amount},{order.price}\n')
-
-def load_active_orders() -> dict:
-    active_orders = {}
-    try:
-        with open(os.path.join(DATA_DIR, 'active-orders.csv'), 'r', encoding='utf-8') as f:
-            for line in f:
-                order = Order(order_status(line.split(',')[1]))
-                active_orders[order.id] = order
-    except Exception as e:
-        pass
-    return active_orders
-
-def save_active_orders(orders: dict) -> None:
-    with open(os.path.join(DATA_DIR, 'active-orders.csv'), 'w', encoding='utf-8') as f:
-        for order in orders.values():
-            f.write(f'{order.timestamp},{order.id},{order.side},{order.symbol},{order.original_amount},{order.price}\n')
-
-def load_closed_orders() -> dict:
-    closed_orders = {}
-    try:
-        with open(os.path.join(DATA_DIR, 'closed-orders.csv'), 'r', encoding='utf-8') as f:
-            for line in f:
-                order = Order(order_status(line.split(',')[1]))
-                closed_orders[order.id] = order
-    except Exception as e:
-        pass
-    return closed_orders
-
-def save_closed_orders(orders: dict) -> None:
-    with open(os.path.join(DATA_DIR, 'closed-orders.csv'), 'w', encoding='utf-8') as f:
-        for order in orders.values():
-            f.write(f'{order.timestamp},{order.id},{order.side},{order.symbol},{order.original_amount},{order.price}\n')
-
-
 ### Main
 
 add_percentage = lambda price, ratio: price + (price * ratio)
 
-def price_stream(symbol: str):
-    while True:
-        yield Decimal(ticker(symbol)['last'])
-
 def runloop(symbol: str):
     """that's right, it's an 84 line function, read it and weep"""
 
-    active_orders = load_active_orders()
-    closed_orders = load_closed_orders()
+    data_path = os.path.join(DATA_DIR, symbol)
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+
+    active_orders = load_active_orders(data_path)
+    closed_orders = load_closed_orders(data_path)
 
     if active_orders:
         print(f'[i] Loaded {len(active_orders) + len(closed_orders)} orders from {DATA_DIR}')
@@ -113,7 +67,7 @@ def runloop(symbol: str):
             f'${USD_MIN_ORDER_AMT} and {USD_MAX_ORDER_AMT} each.'
         )
 
-    print(ascii_art)
+    print(currency_art[symbol])
     print(
         f'This bot buys random starting amounts, then sells if the price\n'
         f'raises by {round(MAX_GAIN_RATIO * 100, 2)}% or '
@@ -123,8 +77,9 @@ def runloop(symbol: str):
 
     A, B = currency_pair_by_symbol[symbol]  # 'ethusd' => (ETH, USD)
 
-    for price in price_stream(symbol):
-        save_price(price)
+    while True:
+        price = Decimal(ticker(symbol)['last'])
+        save_price(data_path, price)
         print('=================================================================')
         print(f'Current Price: ${price} {symbol.upper()}')
 
@@ -145,7 +100,7 @@ def runloop(symbol: str):
                 price=B(add_percentage(price, OVERPAY_RATIO)),
             ))
             active_orders[buy_order.id] = buy_order
-            save_order(buy_order)
+            save_order(data_path, buy_order)
 
         # For each order, sell it if it's gained or lost enough to hit its limit
         for id, order in active_orders.items():
@@ -165,10 +120,10 @@ def runloop(symbol: str):
                     'sell': sell_order,
                     'net': sell_order.filled_amt - buy_order.filled_amt,
                 }
-                save_order(buy_order)
+                save_order(data_path, buy_order)
 
-        save_active_orders(active_orders)
-        save_closed_orders(closed_orders)
+        save_active_orders(data_path, active_orders)
+        save_closed_orders(data_path, closed_orders)
 
         # Print order table status
         net_gains = sum(order['net'] for order in closed_orders.values())
@@ -196,7 +151,11 @@ def runloop(symbol: str):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        symbol = sys.argv[1]
+    else:
+        symbol = SYMBOL
     try:
         runloop(SYMBOL)
     except (EOFError, KeyboardInterrupt):
-        print(f'\n[√] Saved active orders to {DATA_DIR}')
+        print(f'\n[√] Saved active orders to {DATA_DIR}/{symbol}')

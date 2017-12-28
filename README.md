@@ -10,7 +10,7 @@ cp secrets_default.py secrets.py               # Save your API Key
 
 pip3 install -r requirements.txt               # Install dependencies
 nano settings.py                               # Confirm your bot parameters
-python3 ./example.py                           # Run the example theshold bot
+python3 ./example.py ethusd                    # Run the example theshold bot
 ```
 
 **Config:**

@@ -4,7 +4,7 @@ from decimal import Decimal
 API_VERSION = 1
 API_URL = 'https://api.gemini.com'
 API_WS_URL = 'wss://api.gemini.com'
-STARTING_NONCE = 600                # must always increase incrementally
+STARTING_NONCE = 800                # must always increase incrementally
 
 SYMBOL = 'ethusd'                   # currency pair to trade
 POLL_DELAY = 30                     # runloop interval in seconds
@@ -18,15 +18,10 @@ OVERPAY_RATIO = Decimal(0.005)      # percentage to pay over current price in or
 USD_MAX_NET_GAINS = 100             # total maximum USD gains before quitting the program
 USD_MAX_NET_LOSS = -20              # total maximum USD losses before quitting the program
 
-DATA_DIR = f'./data/{SYMBOL}'       # where to store the state and logs
+DATA_DIR = f'./data'                # where to store the state and logs
 
 try:
     from secrets import *               # copy and edit secrets_default.py to secrets.py
 except ImportError:
     print('Copy secrets_default.py to secrets.py to add your API credentials')
     raise SystemExit(1)
-
-try:
-    os.makedirs(DATA_DIR)
-except Exception:
-    pass
