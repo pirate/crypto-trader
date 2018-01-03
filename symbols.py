@@ -10,13 +10,13 @@ from decimal import Decimal
 
 class Currency:
     """Base class for currencies that have a decimal place limit"""
+    amt: Decimal
     icon: str
     symbol: str
     decimal_places: int
 
     def __init__(self, amt: Decimal) -> None:
-        assert amt >= 0
-        self.amt = round(Decimal(amt), self.decimal_places)
+        self.amt = Decimal(round(Decimal(amt), self.decimal_places))
 
     def __str__(self) -> str:
         return str(self.amt)
@@ -25,59 +25,64 @@ class Currency:
         return f'{self.icon}{self.amt}'
 
     def __add__(self, other: object) -> 'Currency':
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.__class__(other.amt + self.amt)
         return NotImplemented
 
     def __radd__(self, other: object) -> 'Currency':
         if other == 0:
             return self  # needed for sum(n for n in (USD(1), USD(2)))
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.__class__(self.amt + other.amt)
         return NotImplemented
 
     def __sub__(self, other: object) -> 'Currency':
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.__class__(self.amt - other.amt)
         return NotImplemented
 
     def __rsub__(self, other: object) -> 'Currency':
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.__class__(other.amt - self.amt)
+        return NotImplemented
+
+    def __mul__(self, other: object) -> 'Currency':
+        if isinstance(other, (int, Decimal)):
+            return self.__class__(self.amt * other)
         return NotImplemented
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, (int, float, Decimal)):
             return self.amt == other
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.amt == other.amt
         return NotImplemented
 
     def __gt__(self, other: object) -> bool:
         if isinstance(other, (int, float, Decimal)):
             return self.amt > other
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.amt > other.amt
         return NotImplemented
 
     def __ge__(self, other: object) -> bool:
         if isinstance(other, (int, float, Decimal)):
             return self.amt >= other
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.amt >= other.amt
         return NotImplemented
 
     def __lt__(self, other: object) -> bool:
         if isinstance(other, (int, float, Decimal)):
             return self.amt < other
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.amt < other.amt
         return NotImplemented
 
     def __le__(self, other: object) -> bool:
         if isinstance(other, (int, float, Decimal)):
             return self.amt <= other
-        if isinstance(other, self.__class__):
+        if isinstance(other, self.__class__) and isinstance(other, Currency):
             return self.amt <= other.amt
         return NotImplemented
 
