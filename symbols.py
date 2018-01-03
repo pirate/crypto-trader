@@ -117,26 +117,27 @@ currency_pair_by_symbol = {
 class Order:
     """Object representing a Gemini order"""
     # Spec: https://docs.gemini.com/rest-api/#order-status
-    # {
-    #   "order_id" : "44375901",
-    #   "id" : "44375901",
-    #   "symbol" : "btcusd",
-    #   "exchange" : "gemini",
-    #   "avg_execution_price" : "400.00",
-    #   "side" : "buy",
-    #   "type" : "exchange limit",
-    #   "timestamp" : "1494870642",
-    #   "timestampms" : 1494870642156,
-    #   "is_live" : false,
-    #   "is_cancelled" : false,
-    #   "is_hidden" : false,
-    #   "was_forced" : false,
-    #   "executed_amount" : "3",
-    #   "remaining_amount" : "0",
-    #   "options" : [ ],
-    #   "price" : "400.00",
-    #   "original_amount" : "3"
-    # }
+    _schema = {
+      "order_id": "44375901",
+      "id": "44375901",
+      "symbol": "btcusd",
+      "exchange": "gemini",
+      "avg_execution_price": "400.00",
+      "side": "buy",
+      "type": "exchange limit",
+      "timestamp": "1494870642",
+      "timestampms": 1494870642156,
+      "is_live": False,
+      "is_cancelled": False,
+      "is_hidden": False,
+      "was_forced": False,
+      "executed_amount": "3",
+      "remaining_amount": "0",
+      "options": [],
+      "price": "400.00",
+      "original_amount": "3",
+    }
+
     def __init__(self, json):
         if json.get('result') == 'error':
             print(json.get('message'))
@@ -172,11 +173,10 @@ class Order:
     def filled_amt(self) -> Currency:
         return USD(Decimal(self.price) * Decimal(self.executed_amount))
 
-
 currency_art = {
     'ethusd': '''
  _______ _________                   _______  ______  
-(  ____ \\__   __/|\     /||\     /|(  ____ \(  __  \ 
+(  ____ \\\__   __/|\     /||\     /|(  ____ \(  __  \ 
 | (    \/   ) (   | )   ( || )   ( || (    \/| (  \  )
 | (__       | |   | (___) || |   | || (_____ | |   ) |
 |  __)      | |   |  ___  || |   | |(_____  )| |   | |
@@ -196,7 +196,7 @@ ______ _________ _______           _______  ______
 ''',
     'ethbtc': '''
  _______ _________          ______ _________ _______ 
-(  ____ \\__   __/|\     /|(  ___ \\__   __/(  ____ \
+(  ____ \\\__   __/|\     /|(  ___ \\\__   __/(  ____ \
 | (    \/   ) (   | )   ( || (   ) )  ) (   | (    \/
 | (__       | |   | (___) || (__/ /   | |   | |      
 |  __)      | |   |  ___  ||  __ (    | |   | |      
