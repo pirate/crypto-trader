@@ -18,7 +18,7 @@ OVERPAY_RATIO = Decimal(0.0025)     # percentage to pay over current price in or
 USD_MAX_NET_GAINS = 10000           # total maximum USD gains before quitting the program
 USD_MAX_NET_LOSS = -20              # total maximum USD losses before quitting the program
 
-DATA_DIR = f'./data'                # where to store the state and logs
+DATA_DIR = './data'                # where to store the state and logs
 
 try:
     from secrets import *               # copy and edit secrets_default.py to secrets.py
