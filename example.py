@@ -67,7 +67,7 @@ def runloop(symbol: str):
         print(f'[i] Loading order data from {data_dir}:')
         active_orders = load_active_orders(data_dir)
         closed_orders = load_closed_orders(data_dir)
-        print(f'[√] Loaded {len(active_orders) + len(closed_orders)} orders from {data_dir}.')
+        print(f'[√] Loaded {len(active_orders) + len(closed_orders)} orders from {data_dir} ({len(active_orders)} active orders).')
         print('=====================================================================')
     else:
         os.makedirs(data_dir)
