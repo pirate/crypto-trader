@@ -1,55 +1,56 @@
 import os
+import json
+
 from datetime import datetime
 from decimal import Decimal
 
-from symbols import Order
+from symbols import Order, Currency
 from gemini_api import order_status
 
 ### Logging & Persistence
 
-def save_price(path: str, price: Decimal) -> None:
-    ts = datetime.now().timestamp()
+def save_price(path: str, price: Currency) -> None:
+    ts = round(datetime.now().timestamp())
 
     with open(os.path.join(path, 'price-history.csv'), 'a+', encoding='utf-8') as f:
-        f.write(f'{ts},{price}\n')
+        f.write(f'{ts},{price.amt}\n')
+
 
 def save_order(path: str, order: Order) -> None:
-    with open(os.path.join(path, 'order-history.csv'), 'a+', encoding='utf-8') as f:
-        f.write(f'{order.timestamp},{order.id},{order.side},{order.symbol},{order.original_amount},{order.price}\n')
+    with open(os.path.join(path, 'order-history.json'), 'a+', encoding='utf-8') as f:
+        f.write(f'{json.dumps(order.data)}\n')
 
 def load_active_orders(path: str) -> dict:
     active_orders = {}
-    try:
-        with open(os.path.join(path, 'active-orders.csv'), 'r', encoding='utf-8') as f:
-            for line in f:
-                order = Order(order_status(line.split(',')[1]))
-                active_orders[order.id] = order
-    except Exception as e:
-        print(e)
+    with open(os.path.join(path, 'active-orders.json'), 'r', encoding='utf-8') as f:
+        for line in f:
+            order = Order(json.loads(line.strip()))
+            active_orders[order.id] = order
+            print(f' - {order.id}: {order}')
     return active_orders
 
 def save_active_orders(path: str, orders: dict) -> None:
-    with open(os.path.join(path, 'active-orders.csv'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(path, 'active-orders.json'), 'w', encoding='utf-8') as f:
         for order in orders.values():
-            f.write(f'{order.timestamp},{order.id},{order.side},{order.symbol},{order.original_amount},{order.price}\n')
+            f.write(f'{json.dumps(order.data)}\n')
+
 
 def load_closed_orders(path: str) -> dict:
     closed_orders = {}
-    try:
-        with open(os.path.join(path, 'closed-orders.csv'), 'r', encoding='utf-8') as f:
-            for line in f:
-                buy_order = Order(order_status(line.split(',')[1]))
-                sell_order = Order(order_status(line.split(',')[2]))
-                closed_orders[buy_order.id] = {
-                    'buy': buy_order,
-                    'sell': sell_order,
-                }
-    except Exception as e:
-        print(e)
+    with open(os.path.join(path, 'closed-orders.json'), 'r', encoding='utf-8') as f:
+        for line in f:
+            buy_order_str, sell_order_str = line.strip().split('->', 1)
+            buy_order = Order(json.loads(buy_order_str))
+            sell_order = Order(json.loads(sell_order_str))
+            closed_orders[buy_order.id] = {
+                'buy': buy_order,
+                'sell': sell_order,
+            }
+            print(f' - {sell_order.id}: {sell_order}')
     return closed_orders
 
 def save_closed_orders(path: str, orders: dict) -> None:
-    with open(os.path.join(path, 'closed-orders.csv'), 'w', encoding='utf-8') as f:
-        for buy_id, obj in orders.items():
-            sell_order = obj['sell']
-            f.write(f'{sell_order.timestamp},{buy_id},{sell_order.id},{sell_order.side},{sell_order.symbol},{sell_order.original_amount},{sell_order.price}\n')
+    with open(os.path.join(path, 'closed-orders.json'), 'w', encoding='utf-8') as f:
+        for buy_id, pair in orders.items():
+            buy_order, sell_order = pair['buy'], pair['sell']
+            f.write(f'{json.dumps(buy_order.data)}->{json.dumps(sell_order.data)}\n')
