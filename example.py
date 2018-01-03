@@ -22,7 +22,7 @@ from time import sleep
 from decimal import Decimal
 
 from gemini_api import ticker, new_order, order_status, heartbeat
-from symbols import Order, currency_pair_by_symbol, currency_art
+from symbols import USD, Order, currency_pair_by_symbol, currency_art
 from data import (
     save_price,
     save_order,
@@ -48,6 +48,7 @@ from settings import (
 ### Main
 
 add_percentage = lambda price, ratio: price + (price * ratio)
+net_profit = lambda obj: obj['sell'].filled_amt - obj['buy'].filled_amt
 
 def runloop(symbol: str):
     """that's right, it's an 84 line function, read it and weep"""
@@ -104,33 +105,40 @@ def runloop(symbol: str):
 
         # For each order, sell it if it's gained or lost enough to hit its limit
         for id, order in active_orders.items():
-            if (price > add_percentage(price, MAX_GAIN_RATIO) or
-                  price < add_percentage(price, MAX_LOSS_RATIO)):
+            if (price > add_percentage(Decimal(order.price), MAX_GAIN_RATIO) or
+                  price < add_percentage(Decimal(order.price), MAX_LOSS_RATIO)):
                 
                 buy_order = active_orders.pop(id)
+                sell_price = B(add_percentage(price, -OVERPAY_RATIO))
                 sell_order = Order(new_order(
                     side='sell',
                     symbol=symbol,
-                    amt=buy_order.amt,
-                    price=B(add_percentage(price, -OVERPAY_RATIO)),
+                    amt=buy_order.buy_amt,
+                    price=sell_price,
                 ))
 
                 closed_orders[id] = {
                     'buy': buy_order,
                     'sell': sell_order,
-                    'net': sell_order.filled_amt - buy_order.filled_amt,
                 }
                 save_order(data_path, buy_order)
+                direction = 'up' if sell_price > buy_order.price_amt else 'down'
+                print(
+                    f'[$] Sold {repr(buy_order.buy_amt)} @ {repr(sell_price)} {direction} '
+                    f'from {repr(buy_order.price_amt)} for a net profit of: {repr(net_profit(closed_orders[id]))}'
+                )
+                break
 
         save_active_orders(data_path, active_orders)
         save_closed_orders(data_path, closed_orders)
 
         # Print order table status
-        net_gains = sum(order['net'] for order in closed_orders.values())
+        
+        net_gains = sum(net_profit(obj) for obj in closed_orders.values())
         print(f'Buys:')
         print('\n'.join(f'{id}: {order}' for id, order in active_orders.items()))
         print(f'Sells:')
-        print('\n'.join(f'{id}: {order}' for id, order in closed_orders.items()))
+        print('\n'.join(f'{id}: {obj["sell"]}' for id, obj in closed_orders.items()))
         print(f'Net Gains: ${net_gains}')
 
         # Quit if total net gains or losses hit the limit

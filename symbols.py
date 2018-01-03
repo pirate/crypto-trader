@@ -15,7 +15,7 @@ class Currency:
     decimal_places: int
 
     def __init__(self, amt: Decimal) -> None:
-        assert amt > 0
+        assert amt >= 0
         self.amt = round(Decimal(amt), self.decimal_places)
 
     def __str__(self) -> str:
@@ -23,6 +23,63 @@ class Currency:
 
     def __repr__(self) -> str:
         return f'{self.icon}{self.amt}'
+
+    def __add__(self, other: object) -> 'Currency':
+        if isinstance(other, self.__class__):
+            return self.__class__(other.amt + self.amt)
+        return NotImplemented
+
+    def __radd__(self, other: object) -> 'Currency':
+        if other == 0:
+            return self  # needed for sum(n for n in (USD(1), USD(2)))
+        if isinstance(other, self.__class__):
+            return self.__class__(self.amt + other.amt)
+        return NotImplemented
+
+    def __sub__(self, other: object) -> 'Currency':
+        if isinstance(other, self.__class__):
+            return self.__class__(self.amt - other.amt)
+        return NotImplemented
+
+    def __rsub__(self, other: object) -> 'Currency':
+        if isinstance(other, self.__class__):
+            return self.__class__(other.amt - self.amt)
+        return NotImplemented
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, (int, float, Decimal)):
+            return self.amt == other
+        if isinstance(other, self.__class__):
+            return self.amt == other.amt
+        return NotImplemented
+
+    def __gt__(self, other: object) -> bool:
+        if isinstance(other, (int, float, Decimal)):
+            return self.amt > other
+        if isinstance(other, self.__class__):
+            return self.amt > other.amt
+        return NotImplemented
+
+    def __ge__(self, other: object) -> bool:
+        if isinstance(other, (int, float, Decimal)):
+            return self.amt >= other
+        if isinstance(other, self.__class__):
+            return self.amt >= other.amt
+        return NotImplemented
+
+    def __lt__(self, other: object) -> bool:
+        if isinstance(other, (int, float, Decimal)):
+            return self.amt < other
+        if isinstance(other, self.__class__):
+            return self.amt < other.amt
+        return NotImplemented
+
+    def __le__(self, other: object) -> bool:
+        if isinstance(other, (int, float, Decimal)):
+            return self.amt <= other
+        if isinstance(other, self.__class__):
+            return self.amt <= other.amt
+        return NotImplemented
 
 class USD(Currency):
     icon = '$'
@@ -91,7 +148,7 @@ class Order:
         return (
             f'{self.side.upper()} {self.symbol.upper()} '
             f'{repr(self.buy_amt)} @ {repr(self.price_amt)} ({pct}% filled '
-            f'for ${round(self.filled_amt, 2)})'
+            f'for {repr(self.filled_amt)})'
         )
 
     @property
@@ -107,8 +164,8 @@ class Order:
         return currency_by_symbol[self.symbol[3:]](Decimal(self.price))
 
     @property
-    def filled_amt(self) -> Decimal:
-        return Decimal(self.price) * Decimal(self.executed_amount)
+    def filled_amt(self) -> Currency:
+        return USD(Decimal(self.price) * Decimal(self.executed_amount))
 
 
 currency_art = {
