@@ -59,7 +59,7 @@ from symbols import Order, USD, BTC, ETH
 
 **Order:**
 All API functions that deal with order data like `new_order` or `order_status` return a raw json dict from Gemini with the schema below.  It can be converted to a type-checked python object by using `Order(order_json)`.
-```json
+```python
 order_json = {
     "order_id": "44375901",
     "id": "44375901",
@@ -88,7 +88,7 @@ order_id = buy_order.id
 The Gemini REST API functions documentation can be found here:  
 https://docs.gemini.com/rest-api/#requests
 
-**`api.ticker(symbol: str) -> dict`:**
+**`api.ticker(symbol: str) -> dict`:**  
 Get the ticker price info for a given symbol, e.g.:
 ```python
 ticker_info = api.ticker('ethusd')
@@ -96,14 +96,14 @@ ticker_info = api.ticker('ethusd')
 last_price = USD(ticker_info['last'])
 ```
 
-**`api.new_order(side: str, symbol: str, amt: Currency, price: Currency) -> dict`:**
+**`api.new_order(side: str, symbol: str, amt: Currency, price: Currency) -> dict`:**  
 Submit a new order to Gemini, e.g:
 ```python
 buy_order = Order(api.new_order('buy', 'ethusd', ETH(0.01), USD(965)))
 sell_order = Order(api.new_order('sell', 'ethusd', ETH(0.01), USD(965)))
 ```
 
-**`order_status(order_id: str) -> dict`:**
+**`order_status(order_id: str) -> dict`:**  
 Get the updated order info json from Gemini for a given order_id, e.g.:
 ```python
 buy_order = Order(api.order_status('44375901'))
@@ -114,7 +114,7 @@ print(buy_order.filled_amt)
 The Gemini WebSocket API functions documentation can be found here:  
 https://docs.gemini.com/websocket-api/#websocket-request
 
-**`order_events(order_id: str) -> Generator[dict]`:**
+**`order_events(order_id: str) -> Generator[dict]`:**  
 Get a live-updating stream of order events via WebSocket e.g.:
 ```python
 for event in api.order_events('44375901'):
