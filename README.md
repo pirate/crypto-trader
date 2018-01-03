@@ -4,44 +4,43 @@
 ---
 <img src="https://nicksweeting.com/crypto-trader.png" width="600px"/>
 
-Example Usage:
+## Quickstart
+
+1. **Open https://exchange.gemini.com/settings/api and get an API key & secret**
+```bash
+cp secrets_default.py secrets.py
+nano secrets.py  # add key & secret here
+```
+
+2. **Install Dependencies**
+```bash
+git clone https://github.com/pirate/cryto-trader.git
+cd crypto-trader
+pip3 install -r requirements.txt
+```
+
+3. **Start hacking!**
 ```python
 import gemini_api as api
 from symbols import Order, ETH, USD
 
-# REST API Functions https://docs.gemini.com/rest-api/#requests
-last_price_info = api.ticker('ethusd')
-last_price = USD(last_price_info['last'])
+last_price = USD(api.ticker('ethusd')['last'])
 buy_order = Order(api.new_order('buy', 'ethusd', ETH(0.001), last_price))
-updated_order = Order(api.order_status(buy_order.id))
 
-# Realtime WebSocket Events  https://docs.gemini.com/websocket-api/#websocket-request
-for event in order_events('2341241241'):
+for event in order_events(buy_order.id):
     print(event)
 ```
 
-It also comes with an example bot strategy that makes some random initial buys and triggers sells once a certain threshold amount of money is made or lost.
-
-**Usage:**
+4. **(Optional) run the example bot**
 ```bash
-open https://exchange.gemini.com/settings/api  # Get an API key 
-cp secrets_default.py secrets.py               # Save your API Key
-
-pip3 install -r requirements.txt               # Install dependencies
-nano settings.py                               # Confirm your bot parameters
-python3 ./example.py ethusd                    # Run the example theshold bot
+nano settings.py                   # Confirm your bot parameters
+python3 ./example.py ethusd        # Run the example theshold bot
 ```
 
-**Config:**
-```bash
-nano secrets.py   # edit API key
-nano settings.py  # tweak bot parameters
-```
+## Configuration
 
-**MyPy Type-Checing:**
-```bash
-env MYPYPATH=./stubs mypy example.py
-```
+ - **API Key Secrets:** `secrets.py`
+ - **Bot Settings:** `settings.py`
 
 ## API Documentation
 
@@ -50,13 +49,15 @@ import gemini_api as api
 from symbols import Order, USD, BTC, ETH
 ```
 
-**Supported Currency Types:**
+### Data Types
+
+**Currencies:**
  - `Currency`: Base type for all curencies, don't use it directly.
  - `USD`: US Dollar `USD(1.25)`
  - `BTC`: Bitcoin   `BTC(0.000001)`
  - `ETH`: Ethereum  `ETH(0.0001)`
 
-**Order Type:**
+**Order:**
 All API functions that deal with order data like `new_order` or `order_status` return a raw json dict from Gemini with the schema below.  It can be converted to a type-checked python object by using `Order(order_json)`.
 ```json
 order_json = {
@@ -83,6 +84,10 @@ buy_order = Order(order_json)
 order_id = buy_order.id
 ```
 
+### REST API Functions
+The Gemini REST API functions documentation can be found here:  
+https://docs.gemini.com/rest-api/#requests
+
 **`api.ticker(symbol: str) -> dict`:**
 Get the ticker price info for a given symbol, e.g.:
 ```python
@@ -105,6 +110,17 @@ buy_order = Order(api.order_status('44375901'))
 print(buy_order.filled_amt)
 ```
 
+### WebSocket API Functions
+The Gemini WebSocket API functions documentation can be found here:  
+https://docs.gemini.com/websocket-api/#websocket-request
+
+**`order_events(order_id: str) -> Generator[dict]`:**
+Get a live-updating stream of order events via WebSocket e.g.:
+```python
+for event in api.order_events('44375901'):
+    print(event)
+```
+
 ## Strategy Information
 
 `example.py` is a simple example bot that randomly creates some initial buys, then sells the moment it makes a certain threshold percentage of profit.
@@ -113,12 +129,21 @@ It might profit if the market is trending upwards, but generally this strategy [
 
 This type of tight, risk-averse bot will only make small profits because it never waits for big upward trends to max out, it sells as soon as it goes in the green.  The days where it starts in the red and stays there also end up sucking much of the profit away.
 
-## TODOS:
+## Roadmap
 
 * Write a meta-trader that spawns multiple traders with tweaked parameters to see which ones make the most money
 * Add GDAX/Coinbase Exchange API bindings
 * Add Bitfinex Exchange API bindings
 
-## Disclaimer:
+## Developer Info
+
+This library is built on Python 3.6 and uses MyPy for type checking.
+
+**Check MyPy types:**
+```bash
+env MYPYPATH=./stubs mypy example.py
+```
+
+## Disclaimer
 
 I'm not responsible for any money you lose from this code.  The code is MIT Licensed.
