@@ -2,7 +2,6 @@
 :moneybag: Python bindings for trading Bitcoin, Ethereum, & USD on the Gemini.com Exchange API.
 
 ---
-<img src="https://nicksweeting.com/crypto-trader.png?v=1" width="500px"/>
 
 ## Quickstart
 
@@ -123,7 +122,9 @@ for event in api.order_events('44375901'):
     print(event)
 ```
 
-## Strategy Information
+## Example Bot
+
+<img src="https://nicksweeting.com/crypto-trader.png?v=1" width="500px"/>
 
 `example.py` is a simple example bot that randomly creates some initial buys, then sells the moment it makes a certain threshold percentage of profit.
 
