@@ -5,17 +5,17 @@
 
 ## Quickstart
 
-1. **Open https://exchange.gemini.com/settings/api and get an API key & secret**
-```bash
-cp secrets_default.py secrets.py
-nano secrets.py  # add key & secret here
-```
-
-2. **Install Dependencies**
+1. **Download & install**
 ```bash
 git clone https://github.com/pirate/cryto-trader.git
 cd crypto-trader
 pip3 install -r requirements.txt
+```
+
+2. **Open https://exchange.gemini.com/settings/api and get an API key & secret**
+```bash
+cp secrets_default.py secrets.py
+nano secrets.py  # add key & secret here
 ```
 
 3. **Start hacking!**
