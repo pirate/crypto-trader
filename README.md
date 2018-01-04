@@ -23,11 +23,12 @@ pip3 install -r requirements.txt
 import gemini_api as api
 from symbols import Order, ETH, USD
 
-last_price = USD(api.ticker('ethusd')['last'])
-buy_order = Order(api.new_order('buy', 'ethusd', ETH(0.001), last_price))
+current_price = USD(api.ticker('ethusd')['last'])
+if current_price > USD(950.00):
+    buy_order = Order(api.new_order('buy', 'ethusd', ETH(0.001), current_price))
 
-for event in order_events(buy_order.id):
-    print(event)
+    for event in order_events(buy_order.id):
+        print(event)
 ```
 
 4. **(Optional) run the example bot**
