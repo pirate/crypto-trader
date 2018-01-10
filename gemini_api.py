@@ -110,7 +110,11 @@ def request(url: str, request_json: dict=None, method='POST', public: bool=False
     if response.status_code == 429:
         raise RateLimitExceeded
 
-    return json.loads(response.text)
+    try:
+        return json.loads(response.text)
+    except json.decoder.JSONDecodeError:
+        print(response.text)
+        raise
 
 @retry_if_exception
 def websocket_request(url, request_json: dict=None):
