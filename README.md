@@ -2,6 +2,7 @@
 :moneybag: Python bindings for trading Bitcoin, Ethereum, & USD on the Gemini.com Exchange API.
 
 ---
+## ARCHIVED: Use https://github.com/ccxt/ccxt
 
 ## Quickstart
 
